@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수련회 일정·안내 만들기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff; --card: #f4f6f8; --card-2: #e9edf1;
+    --ink: #1a1f24; --ink-soft: #454f59;
+    --line: #c4ccd4; --accent: #1f5fa8; --accent-deep: #163f72;
+    --ok: #1d6b3a; --warn: #9a5b00; --focus: #ffae00; --danger: #b3261e;
+    --fs: 1;
+  }
+  body.high-contrast {
+    --bg: #000000; --card: #1a1a1a; --card-2: #2a2a2a;
+    --ink: #ffffff; --ink-soft: #e0e0e0;
+    --line: #ffffff; --accent: #ffd400; --accent-deep: #ffd400;
+    --ok: #4ade80; --warn: #fbbf24; --danger: #ff6b6b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif; background: var(--bg);
+    color: var(--ink); line-height: 1.8; -webkit-tap-highlight-color: transparent;
+  }
+  a:focus, button:focus, [tabindex]:focus, input:focus, textarea:focus, select:focus {
+    outline: 4px solid var(--focus); outline-offset: 2px;
+  }
+
+  /* 접근성 도구막대 */
+  .a11y-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--accent); color: #fff;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 10px 14px;
+  }
+  body.high-contrast .a11y-bar { color: #000; border-bottom: 3px solid #fff; }
+  .a11y-bar .a11y-label { font-weight: 900; font-size: calc(0.95rem * var(--fs)); margin-right: 4px; }
+  .a11y-btn {
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+    font-size: calc(0.92rem * var(--fs));
+    padding: 8px 14px; border: 2px solid #fff; border-radius: 8px;
+    background: rgba(255,255,255,0.15); color: inherit; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+  }
+  body.high-contrast .a11y-btn { border-color: #000; background: rgba(0,0,0,0.2); }
+  .a11y-btn:hover { background: rgba(255,255,255,0.3); }
+  .a11y-btn.on { background: #fff; color: var(--accent); }
+  body.high-contrast .a11y-btn.on { background: #000; color: #ffd400; }
+
+  .wrap { max-width: 820px; margin: 0 auto; padding: 0 16px 80px; }
+  header { text-align: center; padding: 30px 14px 10px; }
+  h1 { font-size: calc(1.9rem * var(--fs)); font-weight: 900; line-height: 1.35; }
+  .theme { font-size: calc(1rem * var(--fs)); color: var(--ink-soft); margin-top: 6px; }
+
+  /* 모드 전환 (보기 / 편집) */
+  .mode-switch {
+    display: flex; gap: 8px; justify-content: center; margin: 16px 0 6px;
+  }
+  .mode-btn {
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+    font-size: calc(1rem * var(--fs));
+    padding: 11px 24px; border: 3px solid var(--line); border-radius: 24px;
+    background: var(--card); color: var(--ink-soft); cursor: pointer;
+  }
+  .mode-btn.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  body.high-contrast .mode-btn.on { color: #000; }
+  .mode-hint {
+    text-align: center; font-size: calc(0.88rem * var(--fs));
+    color: var(--ink-soft); margin-bottom: 18px;
+  }
+
+  .help-text {
+    background: var(--card-2); border-radius: 10px; padding: 12px 16px;
+    margin-bottom: 16px; font-size: calc(0.92rem * var(--fs)); line-height: 1.9;
+  }
+  .help-text strong { color: var(--accent-deep); }
+
+  /* 큰 메뉴 */
+  .nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 16px 0 22px; }
+  .nav-btn {
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+    font-size: calc(1.05rem * var(--fs));
+    padding: 16px 12px; border: 3px solid var(--line); border-radius: 14px;
+    background: var(--card); color: var(--ink); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .nav-btn .nav-icon { font-size: calc(1.7rem * var(--fs)); }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+  body.high-contrast .nav-btn.active { color: #000; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--card); border: 2px solid var(--line);
+    border-radius: 14px; padding: 18px 18px; margin-bottom: 14px;
+  }
+  .card h2 {
+    font-size: calc(1.25rem * var(--fs)); font-weight: 900; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .read-btn {
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+    font-size: calc(0.82rem * var(--fs));
+    padding: 6px 13px; border: 2px solid var(--accent); border-radius: 18px;
+    background: var(--bg); color: var(--accent); cursor: pointer; margin-left: auto;
+  }
+  .read-btn.reading { background: var(--accent); color: #fff; }
+  body.high-contrast .read-btn.reading { color: #000; }
+
+  /* 정보 표시 행 */
+  .info-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 2px solid var(--card-2); align-items: flex-start; }
+  .info-row:last-child { border-bottom: none; }
+  .info-icon { flex-shrink: 0; font-size: calc(1.5rem * var(--fs)); width: 40px; text-align: center; }
+  .info-text { flex: 1; font-size: calc(1rem * var(--fs)); }
+  .info-key { font-weight: 900; color: var(--accent-deep); }
+  .info-val { font-size: calc(1.02rem * var(--fs)); }
+
+  /* 일정표 */
+  .day-block { margin-bottom: 18px; }
+  .day-title {
+    font-size: calc(1.1rem * var(--fs)); font-weight: 900; color: var(--accent-deep);
+    padding: 8px 0; border-bottom: 3px solid var(--accent); margin-bottom: 8px;
+  }
+  .sch-row {
+    display: flex; gap: 12px; padding: 10px 0; border-bottom: 2px solid var(--card-2);
+    align-items: flex-start;
+  }
+  .sch-row:last-child { border-bottom: none; }
+  .sch-time {
+    flex-shrink: 0; font-weight: 900; color: var(--accent);
+    font-size: calc(1rem * var(--fs)); width: calc(82px * var(--fs)); min-width: 70px;
+  }
+  .sch-act { flex: 1; font-size: calc(1rem * var(--fs)); }
+  .sch-note { font-size: calc(0.86rem * var(--fs)); color: var(--ink-soft); }
+
+  /* 동선 / 공지 / 자막 (보기) */
+  .route-step { display: flex; gap: 12px; padding: 10px 0; border-bottom: 2px solid var(--card-2); }
+  .route-step:last-child { border-bottom: none; }
+  .route-num {
+    flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; font-size: calc(1rem * var(--fs));
+  }
+  body.high-contrast .route-num { color: #000; }
+  .route-text { flex: 1; font-size: calc(1rem * var(--fs)); }
+
+  .notice { padding: 12px 14px; border-radius: 10px; background: var(--card-2); margin-bottom: 10px; }
+  .notice.urgent { border-left: 6px solid var(--danger); }
+  .notice-tag { font-weight: 900; font-size: calc(0.82rem * var(--fs)); color: var(--accent-deep); }
+  .notice.urgent .notice-tag { color: var(--danger); }
+  .notice-body { font-size: calc(1rem * var(--fs)); margin-top: 3px; }
+
+  .caption-display {
+    background: var(--card); border: 3px solid var(--accent); border-radius: 14px;
+    padding: 30px 20px; min-height: 160px; font-size: calc(2.2rem * var(--fs));
+    font-weight: 900; text-align: center; line-height: 1.5;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .caption-display.empty { color: var(--ink-soft); font-weight: 400; font-size: calc(1.1rem * var(--fs)); }
+
+  /* 입력 폼 (편집 모드) */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block; font-weight: 700; font-size: calc(0.95rem * var(--fs)); margin-bottom: 5px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%; font-family: 'Noto Sans KR', sans-serif; font-size: calc(1rem * var(--fs));
+    border: 2px solid var(--line); border-radius: 10px; padding: 11px 13px;
+    background: var(--bg); color: var(--ink);
+  }
+  .field textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+  .btn {
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700; font-size: calc(1rem * var(--fs));
+    padding: 12px 20px; border: none; border-radius: 11px; cursor: pointer;
+    background: var(--accent); color: #fff;
+  }
+  body.high-contrast .btn { color: #000; }
+  .btn.gray { background: var(--card-2); color: var(--ink); }
+  .btn.danger { background: var(--bg); color: var(--danger); border: 2px solid var(--danger); padding: 10px 18px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .edit-row {
+    display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px;
+    padding: 10px; background: var(--card-2); border-radius: 10px;
+  }
+  .edit-row .er-fields { flex: 1; display: flex; gap: 8px; flex-wrap: wrap; }
+  .edit-row .er-fields input, .edit-row .er-fields textarea {
+    flex: 1; min-width: 90px; font-family: 'Noto Sans KR', sans-serif;
+    font-size: calc(0.95rem * var(--fs));
+    border: 2px solid var(--line); border-radius: 8px; padding: 8px 10px;
+    background: var(--bg); color: var(--ink);
+  }
+  .edit-row .er-time { max-width: 110px; }
+  .er-del {
+    flex-shrink: 0; background: var(--bg); border: 2px solid var(--danger);
+    color: var(--danger); border-radius: 8px; padding: 6px 12px; cursor: pointer;
+    font-weight: 700; font-size: calc(0.85rem * var(--fs));
+  }
+  .add-line-btn {
+    width: 100%; font-family: 'Noto Sans KR', sans-serif; font-weight: 700;
+    font-size: calc(0.95rem * var(--fs));
+    padding: 11px; border: 2px dashed var(--accent); border-radius: 10px;
+    background: var(--bg); color: var(--accent); cursor: pointer; margin-top: 4px;
+  }
+  .day-edit-head {
+    display: flex; gap: 8px; align-items: center; margin: 16px 0 8px;
+  }
+  .day-edit-head input {
+    flex: 1; font-family: 'Noto Sans KR', sans-serif; font-weight: 900;
+    font-size: calc(1.05rem * var(--fs)); color: var(--accent-deep);
+    border: 2px solid var(--line); border-radius: 8px; padding: 8px 12px;
+    background: var(--bg);
+  }
+
+  .save-bar {
+    position: sticky; bottom: 0; background: var(--bg);
+    border-top: 3px solid var(--accent); padding: 12px 0; margin-top: 10px;
+    display: flex; gap: 8px; z-index: 40;
+  }
+  .save-bar .btn { flex: 1; }
+
+  .saved-toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--ok); color: #fff; font-weight: 700; padding: 12px 26px;
+    border-radius: 24px; z-index: 100; transition: transform 0.3s; font-size: calc(0.95rem * var(--fs));
+  }
+  body.high-contrast .saved-toast { color: #000; }
+  .saved-toast.show { transform: translateX(-50%) translateY(0); }
+
+  footer {
+    text-align: center; margin-top: 30px; padding-top: 18px;
+    border-top: 2px solid var(--line); color: var(--ink-soft); font-size: calc(0.86rem * var(--fs));
+  }
+
+  /* 인쇄 — 안내문 출력 */
+  @media print {
+    .a11y-bar, .mode-switch, .mode-hint, .nav, .help-text,
+    .read-btn, .save-bar, .edit-only, .print-hide { display: none !important; }
+    .panel { display: block !important; }
+    .card { border: 1px solid #999; break-inside: avoid; }
+    body { background: #fff; color: #000; }
+  }
+
+  @media (max-width: 600px) {
+    .nav { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: calc(1.6rem * var(--fs)); }
+  }
+
+  /* 수련회 질문 검색바 */
+  .qa-box {
+    background: var(--card); border: 3px solid var(--accent);
+    border-radius: 16px; padding: 14px 16px; margin: 16px 0 6px;
+  }
+  .qa-title {
+    font-weight: 900; font-size: calc(1rem * var(--fs));
+    color: var(--accent-deep); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .qa-input-row { display: flex; gap: 8px; }
+  .qa-input {
+    flex: 1; font-family: 'Noto Sans KR', sans-serif; font-size: calc(1rem * var(--fs));
+    border: 2px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    background: var(--bg); color: var(--ink);
+  }
+  .qa-ask {
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 700; font-size: calc(1rem * var(--fs));
+    padding: 12px 20px; border: none; border-radius: 10px; cursor: pointer;
+    background: var(--accent); color: #fff; white-space: nowrap;
+  }
+  body.high-contrast .qa-ask { color: #000; }
+  .qa-ask:disabled { opacity: 0.55; cursor: not-allowed; }
+  .qa-examples { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .qa-chip {
+    font-family: 'Noto Sans KR', sans-serif; font-size: calc(0.82rem * var(--fs));
+    padding: 6px 12px; border: 2px solid var(--line); border-radius: 16px;
+    background: var(--bg); color: var(--ink-soft); cursor: pointer;
+  }
+  .qa-chip:hover { border-color: var(--accent); color: var(--accent); }
+  .qa-answer {
+    margin-top: 12px; padding: 14px 16px; border-radius: 12px;
+    background: var(--card-2); font-size: calc(1rem * var(--fs)); line-height: 1.9;
+    display: none; white-space: pre-wrap;
+  }
+  .qa-answer.show { display: block; }
+  .qa-answer.busy { color: var(--accent); font-weight: 700; }
+  .qa-answer.err { color: var(--danger); font-weight: 700; }
+  .qa-spin {
+    display: inline-block; width: 16px; height: 16px; vertical-align: -3px;
+    border: 3px solid var(--line); border-top-color: var(--accent);
+    border-radius: 50%; animation: qaspin 0.8s linear infinite; margin-right: 6px;
+  }
+  @keyframes qaspin { to { transform: rotate(360deg); } }
+  @media print { .qa-box { display: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- 접근성 도구막대 -->
+<div class="a11y-bar" role="toolbar" aria-label="접근성 도구">
+  <span class="a11y-label">화면 설정</span>
+  <button class="a11y-btn" onclick="changeFontSize(-1)" aria-label="글씨 작게"><span aria-hidden="true">ㄱ−</span> 작게</button>
+  <button class="a11y-btn" onclick="changeFontSize(1)" aria-label="글씨 크게"><span aria-hidden="true">ㄱ+</span> 크게</button>
+  <button class="a11y-btn" id="contrast-btn" onclick="toggleContrast()" aria-label="고대비 모드"><span aria-hidden="true">◑</span> 고대비</button>
+  <button class="a11y-btn" id="autoread-btn" onclick="toggleAutoRead()" aria-label="자동 읽어주기"><span aria-hidden="true">🔊</span> 자동 읽기</button>
+  <button class="a11y-btn" onclick="stopReading()" aria-label="읽기 멈춤"><span aria-hidden="true">⏹</span> 멈춤</button>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1 id="doc-title">모두를 위한 수련회 안내</h1>
+    <p class="theme" id="doc-theme">하나님 나라, 하나님의 방식으로</p>
+  </header>
+
+  <!-- 수련회 질문 검색바 -->
+  <div class="qa-box">
+    <div class="qa-title">🔎 수련회에 대해 궁금한 점을 물어보세요</div>
+    <div class="qa-input-row">
+      <input type="text" id="qa-input" class="qa-input" placeholder="예: 둘째 날 저녁 집회는 무슨 내용인가요?"
+             onkeydown="if(event.key==='Enter') askQuestion()">
+      <button class="qa-ask" id="qa-ask-btn" onclick="askQuestion()">질문하기</button>
+    </div>
+    <div class="qa-examples">
+      <button class="qa-chip" onclick="askExample('수련회 주제와 핵심 목표가 뭐예요?')">수련회 주제는?</button>
+      <button class="qa-chip" onclick="askExample('일정이 어떻게 되나요?')">전체 일정</button>
+      <button class="qa-chip" onclick="askExample('준비물은 무엇인가요?')">준비물</button>
+      <button class="qa-chip" onclick="askExample('교리 강의는 어떤 내용인가요?')">교리 강의 내용</button>
+    </div>
+    <div class="qa-answer" id="qa-answer"></div>
+  </div>
+
+  <!-- 보기 / 편집 모드 전환 -->
+  <div class="mode-switch">
+    <button class="mode-btn on" id="mode-view" onclick="setMode('view')">👀 보기</button>
+    <button class="mode-btn" id="mode-edit" onclick="setMode('edit')">✏️ 편집 (교사용)</button>
+  </div>
+  <p class="mode-hint" id="mode-hint">학생·학부모님은 「보기」로 안내를 봅니다. 교사는 「편집」으로 일정과 내용을 직접 고칠 수 있어요.</p>
+
+  <div class="help-text edit-only" style="display:none">
+    <strong>편집 방법</strong> — 아래 칸에 날짜·장소·일정을 입력하고, 맨 아래 <strong>「저장하기」</strong>를 누르세요.
+    저장하면 「보기」 화면과 인쇄물에 그대로 반영돼요. <strong>「안내문 인쇄」</strong>로 종이 안내문도 만들 수 있어요.
+  </div>
+
+  <!-- 메뉴 -->
+  <nav class="nav" aria-label="안내 메뉴">
+    <button class="nav-btn active" data-panel="info" onclick="selectPanel('info', this)"><span class="nav-icon" aria-hidden="true">📋</span>수련회 안내</button>
+    <button class="nav-btn" data-panel="sched" onclick="selectPanel('sched', this)"><span class="nav-icon" aria-hidden="true">📅</span>일정표</button>
+    <button class="nav-btn" data-panel="route" onclick="selectPanel('route', this)"><span class="nav-icon" aria-hidden="true">🧭</span>이동 동선</button>
+    <button class="nav-btn" data-panel="notice" onclick="selectPanel('notice', this)"><span class="nav-icon" aria-hidden="true">📢</span>공지 사항</button>
+    <button class="nav-btn" data-panel="caption" onclick="selectPanel('caption', this)"><span class="nav-icon" aria-hidden="true">💬</span>자막 보드</button>
+    <button class="nav-btn print-hide" onclick="printGuide()"><span class="nav-icon" aria-hidden="true">🖨️</span>안내문 인쇄</button>
+  </nav>
+
+  <!-- 수련회 안내 -->
+  <div class="panel active" id="panel-info">
+    <!-- 보기 -->
+    <div class="view-only">
+      <div class="card">
+        <h2>📋 수련회 기본 안내 <button class="read-btn" onclick="readCard(this)">🔊 읽어주기</button></h2>
+        <div class="readable" id="info-view"></div>
+      </div>
+      <div class="card">
+        <h2>🤝 함께하기 위한 약속 <button class="read-btn" onclick="readCard(this)">🔊 읽어주기</button></h2>
+        <div class="readable">
+          <div class="info-row"><span class="info-icon" aria-hidden="true">💛</span><span class="info-text"><span class="info-val">이 수련회는 모든 친구가 함께 누리는 자리입니다. 도움이 필요한 친구가 있다면 우리 모두가 함께 돕습니다.</span></span></div>
+          <div class="info-row"><span class="info-icon" aria-hidden="true">🙋</span><span class="info-text"><span class="info-val">필요한 것이 있으면 망설이지 말고 말해 주세요. 묻는 것은 전혀 부끄러운 일이 아닙니다.</span></span></div>
+        </div>
+      </div>
+    </div>
+    <!-- 편집 -->
+    <div class="edit-only" style="display:none">
+      <div class="card">
+        <h2>✏️ 기본 정보 편집</h2>
+        <div class="field"><label>안내문 제목</label><input type="text" id="e-title" placeholder="모두를 위한 수련회 안내"></div>
+        <div class="field"><label>주제 표어</label><input type="text" id="e-theme" placeholder="하나님 나라, 하나님의 방식으로"></div>
+        <div class="field"><label>📅 날짜</label><input type="text" id="e-date" placeholder="예: 8월 4일부터 6일까지, 2박 3일"></div>
+        <div class="field"><label>📍 장소</label><input type="text" id="e-place" placeholder="예: ○○수련원"></div>
+        <div class="field"><label>🎒 준비물</label><input type="text" id="e-items" placeholder="예: 성경, 필기구, 세면도구, 갈아입을 옷, 개인 약"></div>
+        <div class="field"><label>📞 도움이 필요할 때</label><input type="text" id="e-help" placeholder="예: 담당 교사에게 언제든 편하게 말해 주세요"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 일정표 -->
+  <div class="panel" id="panel-sched">
+    <div class="view-only">
+      <div class="card">
+        <h2>📅 수련회 일정표 <button class="read-btn" onclick="readCard(this)">🔊 읽어주기</button></h2>
+        <div class="readable" id="sched-view"></div>
+      </div>
+    </div>
+    <div class="edit-only" style="display:none">
+      <div class="card">
+        <h2>✏️ 일정표 편집</h2>
+        <p class="help-text">날짜(예: 첫째 날 8/4)별로 시간과 내용을 적어요. 「+ 시간 추가」로 줄을 늘리고, 「+ 날짜 추가」로 날을 늘려요.</p>
+        <div id="sched-edit"></div>
+        <button class="add-line-btn" onclick="addDay()">＋ 날짜 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이동 동선 -->
+  <div class="panel" id="panel-route">
+    <div class="view-only">
+      <div class="card">
+        <h2>🧭 수련원 안에서 길 찾기 <button class="read-btn" onclick="readCard(this)">🔊 읽어주기</button></h2>
+        <p class="help-text">계단이 어려우면 엘리베이터·경사로 위치를 담당 교사에게 물어봐 주세요.</p>
+        <div class="readable" id="route-view"></div>
+      </div>
+    </div>
+    <div class="edit-only" style="display:none">
+      <div class="card">
+        <h2>✏️ 이동 동선 편집</h2>
+        <div id="route-edit"></div>
+        <button class="add-line-btn" onclick="addRoute()">＋ 동선 추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 공지 -->
+  <div class="panel" id="panel-notice">
+    <div class="card">
+      <h2>📢 공지 사항 <button class="read-btn" onclick="readCard(this)">🔊 읽어주기</button></h2>
+      <div class="readable" id="notice-list"></div>
+      <div class="edit-only" style="display:none; margin-top:14px">
+        <div class="field"><label>새 공지 입력</label><textarea id="notice-input" placeholder="공지 내용을 적어주세요"></textarea></div>
+        <div class="btn-row">
+          <button class="btn" onclick="addNotice(false)">안내 공지 추가</button>
+          <button class="btn danger" onclick="addNotice(true)">중요 공지 추가</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 자막 보드 -->
+  <div class="panel" id="panel-caption">
+    <div class="card">
+      <h2>💬 자막 보드</h2>
+      <p class="help-text">말하고 싶은 내용을 큰 글씨로 띄워, 듣기 어려운 분께 보여줄 수 있어요.</p>
+      <div class="field"><textarea id="caption-input" placeholder="여기에 입력하면 아래에 큰 글씨로 표시돼요"></textarea></div>
+      <div class="btn-row" style="margin-bottom:14px">
+        <button class="btn" onclick="showCaption()">큰 글씨로 띄우기</button>
+        <button class="btn gray" onclick="readCaption()">🔊 읽어주기</button>
+        <button class="btn gray" onclick="clearCaption()">지우기</button>
+      </div>
+      <div class="caption-display empty" id="caption-display">여기에 자막이 큰 글씨로 표시됩니다</div>
+    </div>
+  </div>
+
+  <!-- 저장 막대 (편집 모드) -->
+  <div class="save-bar edit-only" id="save-bar" style="display:none">
+    <button class="btn" onclick="saveAll()">💾 저장하기</button>
+    <button class="btn gray" onclick="printGuide()">🖨️ 안내문 인쇄</button>
+  </div>
+
+  <footer>수련회 일정·안내 만들기 — 누구나 쉽게 보는 안내</footer>
+</div>
+
+<div class="saved-toast" id="saved-toast">저장되었어요</div>
+
+<script>
+// ============================================
+// 데이터 저장
+// ============================================
+const STORE = 'retreat_planner';
+const defaultData = {
+  title: '모두를 위한 수련회 안내',
+  theme: '하나님 나라, 하나님의 방식으로',
+  date: '8월 4일부터 6일까지, 2박 3일',
+  place: '○○수련원',
+  items: '성경, 필기구, 세면도구, 갈아입을 옷, 개인 약',
+  help: '담당 교사에게 언제든 편하게 말해 주세요. 함께 돕겠습니다.',
+  schedule: [
+    { day: '첫째 날 (8/4)', rows: [
+      { time: '14:00', act: '입소 · 방 배정', note: '도착하면 담당 교사에게 인사해요' },
+      { time: '18:00', act: '저녁 식사', note: '' },
+      { time: '19:30', act: '여는 예배 · 찬양', note: '' }
+    ]},
+    { day: '둘째 날 (8/5)', rows: [
+      { time: '07:30', act: '아침 경건회', note: '' },
+      { time: '09:00', act: '말씀 집회', note: '' },
+      { time: '14:00', act: '체육 활동 · 공과', note: '편한 옷을 입어요' },
+      { time: '19:30', act: '저녁 집회 · 기도', note: '' }
+    ]},
+    { day: '셋째 날 (8/6)', rows: [
+      { time: '08:00', act: '아침 식사', note: '' },
+      { time: '10:00', act: '마무리 예배', note: '' },
+      { time: '12:00', act: '점심 · 정리 · 귀가', note: '' }
+    ]}
+  ],
+  routes: [
+    { text: '현관 → 숙소: 정문으로 들어와 오른쪽 복도 끝. 1층이라 계단이 없습니다.' },
+    { text: '숙소 → 예배실: 복도를 따라 중앙 홀로. 예배실은 홀 왼쪽 큰 문이고 경사로가 있습니다.' },
+    { text: '예배실 → 식당: 중앙 홀에서 오른쪽으로. 같은 층이라 이동이 편합니다.' }
+  ]
+};
+let data = loadData();
+let mode = 'view';
+
+function loadData() {
+  try {
+    const v = JSON.parse(localStorage.getItem(STORE));
+    if (v && v.title !== undefined) return Object.assign({}, defaultData, v);
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(defaultData));
+}
+function persist() {
+  try { localStorage.setItem(STORE, JSON.stringify(data)); } catch (e) {}
+}
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function toast(msg) {
+  const t = document.getElementById('saved-toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 1900);
+}
+
+// ============================================
+// 보기 화면 렌더링
+// ============================================
+function renderViews() {
+  document.getElementById('doc-title').textContent = data.title;
+  document.getElementById('doc-theme').textContent = data.theme;
+
+  // 기본 안내
+  const info = [
+    ['📅', '날짜', data.date],
+    ['📍', '장소', data.place],
+    ['🎒', '준비물', data.items],
+    ['📞', '도움이 필요할 때', data.help]
+  ];
+  document.getElementById('info-view').innerHTML = info.map(([ic, k, v]) => `
+    <div class="info-row"><span class="info-icon" aria-hidden="true">${ic}</span>
+      <span class="info-text"><span class="info-key">${esc(k)}</span><br>
+      <span class="info-val">${esc(v) || '(아직 입력 안 됨)'}</span></span></div>`).join('');
+
+  // 일정표
+  document.getElementById('sched-view').innerHTML = data.schedule.map(d => `
+    <div class="day-block">
+      <div class="day-title">${esc(d.day)}</div>
+      ${d.rows.map(r => `
+        <div class="sch-row">
+          <span class="sch-time">${esc(r.time)}</span>
+          <span class="sch-act">${esc(r.act)}${r.note ? `<br><span class="sch-note">${esc(r.note)}</span>` : ''}</span>
+        </div>`).join('')}
+    </div>`).join('') || '<p class="info-val">아직 일정이 없어요. 편집에서 추가해 주세요.</p>';
+
+  // 동선
+  document.getElementById('route-view').innerHTML = data.routes.map((r, i) => `
+    <div class="route-step"><span class="route-num" aria-hidden="true">${i + 1}</span>
+      <span class="route-text">${esc(r.text)}</span></div>`).join('')
+    || '<p class="info-val">아직 동선이 없어요.</p>';
+}
+
+// ============================================
+// 편집 폼 채우기
+// ============================================
+function fillEditForms() {
+  document.getElementById('e-title').value = data.title;
+  document.getElementById('e-theme').value = data.theme;
+  document.getElementById('e-date').value = data.date;
+  document.getElementById('e-place').value = data.place;
+  document.getElementById('e-items').value = data.items;
+  document.getElementById('e-help').value = data.help;
+  renderSchedEdit();
+  renderRouteEdit();
+}
+
+function renderSchedEdit() {
+  const wrap = document.getElementById('sched-edit');
+  wrap.innerHTML = data.schedule.map((d, di) => `
+    <div class="day-edit-head">
+      <input type="text" value="${esc(d.day)}" oninput="updDay(${di}, this.value)" aria-label="날짜 이름">
+      <button class="er-del" onclick="delDay(${di})">날짜 삭제</button>
+    </div>
+    ${d.rows.map((r, ri) => `
+      <div class="edit-row">
+        <div class="er-fields">
+          <input class="er-time" type="text" value="${esc(r.time)}" placeholder="시간" oninput="updRow(${di},${ri},'time',this.value)" aria-label="시간">
+          <input type="text" value="${esc(r.act)}" placeholder="내용" oninput="updRow(${di},${ri},'act',this.value)" aria-label="내용">
+          <input type="text" value="${esc(r.note)}" placeholder="메모(선택)" oninput="updRow(${di},${ri},'note',this.value)" aria-label="메모">
+        </div>
+        <button class="er-del" onclick="delRow(${di},${ri})">삭제</button>
+      </div>`).join('')}
+    <button class="add-line-btn" onclick="addRow(${di})">＋ 시간 추가</button>
+  `).join('');
+}
+function renderRouteEdit() {
+  const wrap = document.getElementById('route-edit');
+  wrap.innerHTML = data.routes.map((r, i) => `
+    <div class="edit-row">
+      <div class="er-fields">
+        <textarea oninput="updRoute(${i}, this.value)" aria-label="동선 설명">${esc(r.text)}</textarea>
+      </div>
+      <button class="er-del" onclick="delRoute(${i})">삭제</button>
+    </div>`).join('');
+}
+
+// 일정 편집 동작
+function updDay(di, v) { data.schedule[di].day = v; }
+function updRow(di, ri, key, v) { data.schedule[di].rows[ri][key] = v; }
+function addRow(di) { data.schedule[di].rows.push({ time: '', act: '', note: '' }); renderSchedEdit(); }
+function delRow(di, ri) { data.schedule[di].rows.splice(ri, 1); renderSchedEdit(); }
+function addDay() { data.schedule.push({ day: '새 날짜', rows: [{ time: '', act: '', note: '' }] }); renderSchedEdit(); }
+function delDay(di) {
+  if (!confirm('이 날짜 전체를 삭제할까요?')) return;
+  data.schedule.splice(di, 1); renderSchedEdit();
+}
+// 동선 편집
+function updRoute(i, v) { data.routes[i].text = v; }
+function addRoute() { data.routes.push({ text: '' }); renderRouteEdit(); }
+function delRoute(i) { data.routes.splice(i, 1); renderRouteEdit(); }
+
+// ============================================
+// 저장
+// ============================================
+function saveAll() {
+  data.title = document.getElementById('e-title').value.trim() || '모두를 위한 수련회 안내';
+  data.theme = document.getElementById('e-theme').value.trim();
+  data.date = document.getElementById('e-date').value.trim();
+  data.place = document.getElementById('e-place').value.trim();
+  data.items = document.getElementById('e-items').value.trim();
+  data.help = document.getElementById('e-help').value.trim();
+  // 일정·동선은 oninput으로 이미 data에 반영됨 — 빈 줄 정리
+  data.schedule.forEach(d => { d.rows = d.rows.filter(r => r.time || r.act || r.note); });
+  data.routes = data.routes.filter(r => r.text && r.text.trim());
+  persist();
+  renderViews();
+  toast('저장되었어요');
+}
+
+// ============================================
+// 모드 전환
+// ============================================
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-view').classList.toggle('on', m === 'view');
+  document.getElementById('mode-edit').classList.toggle('on', m === 'edit');
+  const showEdit = m === 'edit';
+  document.querySelectorAll('.edit-only').forEach(el => el.style.display = showEdit ? '' : 'none');
+  document.querySelectorAll('.view-only').forEach(el => el.style.display = showEdit ? 'none' : '');
+  document.getElementById('mode-hint').textContent = showEdit
+    ? '내용을 고친 뒤 맨 아래 「저장하기」를 꼭 눌러주세요.'
+    : '학생·학부모님은 「보기」로 안내를 봅니다. 교사는 「편집」으로 일정과 내용을 직접 고칠 수 있어요.';
+  if (showEdit) fillEditForms(); else renderViews();
+}
+
+// ============================================
+// 패널 전환
+// ============================================
+function selectPanel(name, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+  stopReading();
+  if (autoRead) {
+    const panel = document.getElementById('panel-' + name);
+    speak(panel.innerText.replace(/🔊 읽어주기/g, ' '));
+  }
+}
+
+// ============================================
+// 공지
+// ============================================
+const NOTICE_STORE = 'retreat_planner_notices';
+function loadNotices() {
+  try { return JSON.parse(localStorage.getItem(NOTICE_STORE)) || []; } catch (e) { return []; }
+}
+function saveNotices(arr) { try { localStorage.setItem(NOTICE_STORE, JSON.stringify(arr)); } catch (e) {} }
+function renderNotices() {
+  const list = document.getElementById('notice-list');
+  const arr = loadNotices();
+  if (arr.length === 0) {
+    list.innerHTML = '<p class="info-val">아직 공지가 없어요.' +
+      (mode === 'edit' ? ' 아래에서 추가해 주세요.' : '') + '</p>';
+    return;
+  }
+  list.innerHTML = arr.map((n, i) => `
+    <div class="notice ${n.urgent ? 'urgent' : ''}">
+      <span class="notice-tag">${n.urgent ? '⚠ 중요' : '안내'}</span>
+      ${mode === 'edit' ? `<button class="er-del" style="float:right" onclick="delNotice(${i})">삭제</button>` : ''}
+      <div class="notice-body">${esc(n.text)}</div>
+    </div>`).join('');
+}
+function addNotice(urgent) {
+  const input = document.getElementById('notice-input');
+  const text = input.value.trim();
+  if (!text) { alert('공지 내용을 입력해 주세요.'); return; }
+  const arr = loadNotices(); arr.push({ text, urgent }); saveNotices(arr);
+  input.value = ''; renderNotices(); toast('공지를 추가했어요');
+}
+function delNotice(i) {
+  const arr = loadNotices(); arr.splice(i, 1); saveNotices(arr); renderNotices();
+}
+
+// ============================================
+// 자막 보드
+// ============================================
+function showCaption() {
+  const text = document.getElementById('caption-input').value.trim();
+  const display = document.getElementById('caption-display');
+  if (!text) { display.textContent = '여기에 자막이 큰 글씨로 표시됩니다'; display.classList.add('empty'); return; }
+  display.textContent = text; display.classList.remove('empty');
+}
+function readCaption() {
+  const text = document.getElementById('caption-input').value.trim();
+  if (text) speak(text);
+}
+function clearCaption() {
+  document.getElementById('caption-input').value = '';
+  const d = document.getElementById('caption-display');
+  d.textContent = '여기에 자막이 큰 글씨로 표시됩니다'; d.classList.add('empty');
+}
+
+// ============================================
+// 인쇄
+// ============================================
+function printGuide() {
+  if (mode === 'edit') saveAll();
+  // 인쇄 시 모든 패널을 보이게 (보기 내용)
+  setMode('view');
+  document.querySelectorAll('.panel').forEach(p => p.classList.add('active'));
+  window.print();
+  // 인쇄 후 원래 한 패널만 보이게 복구
+  setTimeout(() => {
+    document.querySelectorAll('.panel').forEach((p, i) => p.classList.toggle('active', i === 0));
+    document.querySelectorAll('.nav-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  }, 300);
+}
+
+// ============================================
+// 접근성 — 글씨 크기 / 고대비 (기존 기능 유지)
+// ============================================
+const A11Y_STORE = 'retreat_planner_a11y';
+let fontScale = 1;
+function applyA11y() {
+  document.documentElement.style.setProperty('--fs', fontScale);
+  try {
+    localStorage.setItem(A11Y_STORE, JSON.stringify({
+      fontScale, contrast: document.body.classList.contains('high-contrast'), autoRead
+    }));
+  } catch (e) {}
+}
+function changeFontSize(dir) {
+  fontScale = Math.min(2.2, Math.max(0.9, fontScale + dir * 0.15));
+  applyA11y();
+}
+function toggleContrast() {
+  document.body.classList.toggle('high-contrast');
+  document.getElementById('contrast-btn').classList.toggle('on',
+    document.body.classList.contains('high-contrast'));
+  applyA11y();
+}
+
+// ============================================
+// 음성 — 읽어주기 (기존 기능 유지)
+// ============================================
+let autoRead = false;
+const synth = window.speechSynthesis;
+let bestKoVoice = null;
+function pickKoreanVoice() {
+  if (!synth) return;
+  const voices = synth.getVoices();
+  if (!voices || voices.length === 0) return;
+  const koVoices = voices.filter(v =>
+    (v.lang && v.lang.toLowerCase().indexOf('ko') === 0) ||
+    (v.name && v.name.indexOf('한국') !== -1) || (v.name && /korean/i.test(v.name)));
+  if (koVoices.length === 0) return;
+  const prefer = ['google', 'siri', 'yuna', 'premium', 'enhanced', 'natural', 'neural'];
+  let best = null, bestScore = -1;
+  koVoices.forEach(v => {
+    let score = 0; const lower = (v.name || '').toLowerCase();
+    prefer.forEach((p, i) => { if (lower.indexOf(p) !== -1) score += (prefer.length - i); });
+    if (v.localService === false) score += 1;
+    if (score > bestScore) { bestScore = score; best = v; }
+  });
+  bestKoVoice = best || koVoices[0];
+}
+if (synth) { pickKoreanVoice(); synth.onvoiceschanged = pickKoreanVoice; }
+function speak(text) {
+  if (!synth) { alert('이 브라우저는 읽어주기를 지원하지 않아요.'); return; }
+  synth.cancel();
+  if (!bestKoVoice) pickKoreanVoice();
+  const sentences = text.replace(/\s+/g, ' ').trim().split(/(?<=[.!?。\n])\s*|(?<=다\.)\s*/).filter(s => s.trim());
+  const chunks = sentences.length > 0 ? sentences : [text];
+  chunks.forEach(chunk => {
+    const u = new SpeechSynthesisUtterance(chunk.trim());
+    u.lang = 'ko-KR'; if (bestKoVoice) u.voice = bestKoVoice;
+    u.rate = 0.92; u.pitch = 1.0; u.volume = 1.0;
+    synth.speak(u);
+  });
+}
+function stopReading() {
+  if (synth) synth.cancel();
+  document.querySelectorAll('.read-btn.reading').forEach(b => {
+    b.classList.remove('reading'); b.textContent = '🔊 읽어주기';
+  });
+}
+function readCard(btn) {
+  const card = btn.closest('.card');
+  const readable = card.querySelector('.readable');
+  const text = (readable || card).innerText.replace(/🔊 읽어주기/g, '').trim();
+  stopReading(); btn.classList.add('reading'); btn.textContent = '⏸ 읽는 중'; speak(text);
+}
+function toggleAutoRead() {
+  autoRead = !autoRead;
+  document.getElementById('autoread-btn').classList.toggle('on', autoRead);
+  applyA11y();
+  if (autoRead) {
+    const active = document.querySelector('.panel.active');
+    if (active) speak(active.innerText.replace(/🔊 읽어주기/g, ' '));
+  } else stopReading();
+}
+
+// ============================================
+// 수련회 질문 답변 (Gemini)
+// ============================================
+// ▼▼▼ 여기에 새로 발급받은 Gemini API 키를 붙여넣으세요 ▼▼▼
+//   (기존에 채팅에 노출된 키는 폐기하고 새 키를 발급받아 사용하세요)
+const QA_GEMINI_API_KEY = "AQ.Ab8RN6LnzzU-9N19pQLP-Rt0sW5trdu6bUyTCrsrlyrs4MbPyQ";
+// ▲▲▲ 데모가 끝나면 Google AI Studio에서 이 키를 삭제하세요 ▲▲▲
+
+// 수련회 교안 (문서 기반 지식)
+const CURRICULUM_TEXT = `하나님 나라, 하나님의 방식으로 — 중고등부 수련회 교안
+
+중고등부 수련회 교안
+
+**하나님 나라,**
+
+**하나님의 방식으로**
+
+*"**너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아**"*
+
+로마서 12:2
+
+| **대상** 중고등부 (14-18세) | **기간** 2박 3일 | **규모** 30명 이상 |
+| --- | --- | --- |
+
+# **수련회 비전 및 핵심 목표**
+
+이 수련회는 단순히 지식을 전달하는 캠프가 아닙니다. 개혁주의 교리의 뼈대 위에, 살아계신 하나님을 실제로 만나는 체험이 함께 흐릅니다. 낮에는 머리로 배우고, 저녁에는 가슴으로 만납니다.
+
+**세 가지 핵심 목표**
+
+- 알기 (Know) — 세상의 방식과 하나님 나라의 방식이 어떻게 다른지 개혁주의 교리로 이해한다
+
+- 느끼기 (Feel) — 저녁 예배를 통해 하나님의 임재를 실제로 체험하고 감동한다
+
+- 살기 (Live) — 수련회 이후 일상에서 하나님의 방식으로 선택하고 행동한다
+
+**개혁주의 교리 4기둥 (수련회 전체를 관통)**
+
+| **하나님의 주권** | 모든 것의 주인은 하나님이시며, 역사와 개인의 삶을 친히 다스리신다 |
+| --- | --- |
+| **인간의 전적 타락** | 인간은 스스로의 방식으로는 승리할 수 없으며, 세상의 방식은 결국 공허하다 |
+| **은혜로운 구속** | 예수 그리스도의 십자가만이 진정한 승리의 길이며, 복음이 세상의 모든 방식을 이긴다 |
+| **성화와 순종** | 구원받은 자는 날마다 하나님의 방식으로 변화되며 그것이 진정한 승리의 삶이다 |
+
+# **1일차 — 나는 어느 나라 사람인가?**
+
+수련회 첫날의 주제는 "세계관의 전쟁"입니다. 아이들이 당연하게 받아들이던 세상의 방식을 복음의 시선으로 직면하게 합니다.
+
+## **일정표**
+
+| **시간** | **프로그램** | **내용 및 비고** |
+| --- | --- | --- |
+| 13:00 | 이동 및 입소 | 짐 정리, 팀 배정, 아이스브레이킹 |
+| **14:30** | **개회 예배** | 찬양 3곡 + 수련회 비전 선포 (담당 교역자) |
+| **15:30** | **교리 강의 1** | 하나님의 주권 — 세상의 왕 vs. 하나님의 왕 |
+| 16:30 | 교리 레크레이션 1 | 팀 대항 토론 게임: 세상의 방식 vs. 하나님의 방식 |
+| 17:30 | 자유 시간 / 팀 친교 | 팀별 미션 활동 (보물찾기 형식) |
+| 19:00 | 저녁 식사 |  |
+| **20:00** | **저녁 집회 1** | 주제: "나는 어느 나라 사람인가?" — 찬양 + 말씀 + 개인 기도 |
+| 21:30 | 소그룹 나눔 | 오늘 하나님이 마음에 두신 것을 나눔 |
+| 22:30 | 취침 |  |
+
+## **교리 강의 1 교안**
+
+| **강의 1 — 하나님의 주권 — 세상의 왕 vs. 하나님의 왕** |
+| --- |
+
+| **핵심 구절** | "땅과 거기 충만한 것과 세계와 그 안에 거하는 자들은 다 여호와의 것이로다" (시 24:1) |
+| --- | --- |
+| **교육 목표** | 학생들이 세상의 방식이 하나의 '왕국 체계'임을 인식하고, 하나님의 주권이 그것을 완전히 초월함을 이해한다 |
+| **핵심 교리** | 하나님의 주권 (Divine Sovereignty) — 웨스트민스터 소요리문답 1문: 인생의 제일 되는 목적은 하나님을 영화롭게 하며 그를 영원토록 즐거워하는 것 |
+
+**강의 내용**
+
+- 도입 질문: "요즘 학교에서 인정받으려면 무엇이 필요한가?" (5분 브레인스토밍)
+
+- 세상의 왕국이 작동하는 방식: 성적, 외모, 인기, 돈 — 이것들이 사람을 판단하는 기준이 된다
+
+- 성경이 말하는 왕국: 시편 24편 — 모든 것의 주인은 여호와이시다. 세상의 기준은 하나님 앞에서 의미가 없다
+
+- 개혁주의 신학의 핵심: 하나님의 절대주권 (Total Sovereignty) — 우연은 없다. 모든 것이 하나님의 계획 안에 있다
+
+- 핵심 질문: "나는 지금 어느 왕국의 방식으로 살고 있는가?"
+
+- 다니엘 1장 적용: 바벨론(세상)의 방식을 거절하고 하나님의 방식으로 산 다니엘이 진짜 승리했다
+
+**소그룹 토의 질문**
+
+- 세상이 나에게 요구하는 방식은 무엇인가? (SNS, 학교, 가정에서)
+
+- 하나님이 나를 판단하시는 기준은 무엇이라고 생각하는가?
+
+- 다니엘처럼 하나님의 방식을 선택하기 어려웠던 순간이 있었는가?
+
+**교리 레크레이션**
+
+팀 대항 토론 게임 — 진행자가 실제 상황(예: 친구 따돌림, 시험 부정행위, SNS 거짓말)을 제시하면, 팀별로 "세상의 방식"팀과 "하나님의 방식"팀으로 나뉘어 각자의 입장을 주장한다. 이후 전체가 함께 하나님의 방식이 왜 진정한 승리인지 토의한다.
+
+## **저녁 집회 1 교안**
+
+| **저녁 집회 1 — ****"****나는 어느 나라 사람인가?****"** |
+| --- |
+
+저녁 집회의 목적은 교리 강의에서 머리로 배운 것이 가슴의 체험으로 연결되는 것입니다. 지식에서 만남으로.
+
+**진행 순서 (90분)**
+
+| 20분 | 찬양 인도 — 느린 찬양으로 시작, 점점 뜨겁게. 추천: '주 이름 높이세', '이 세상은 내 집 아니네', '나의 왕이신 하나님' |
+| --- | --- |
+| 10분 | 기도 — 담당 교역자 통성기도 인도. '주님, 우리가 어느 나라에 속했는지 알게 하소서' |
+| **25분** | 말씀 선포 — 골로새서 1:13-14 "그가 우리를 흑암의 권세에서 건져내사 그의 사랑의 아들의 나라로 옮기셨으니" — 우리는 이미 하나님 나라 시민이다! |
+| 15분 | 개인 기도 시간 — 조용한 찬양 중, 각자 무릎 꿇고 기도. 주제: '나는 지금 무엇을 왕으로 섬기고 있는가?' |
+| 10분 | 팀별 중보기도 — 오늘 마음에 두신 것을 서로 나누고 기도 |
+| **10분** | 마무리 선포 & 파송 찬양 — '나는 하나님 나라 사람이다' 고백 기도로 마무리 |
+
+# **2일차 — 세상의 방식은 왜 무너지는가?**
+
+수련회 둘째 날은 "복음의 능력"을 다룹니다. 세상의 방식이 왜 결국 공허한지, 그리고 복음이 어떻게 모든 것을 이기는지를 깊이 탐구합니다.
+
+## **일정표**
+
+| **시간** | **프로그램** | **내용 및 비고** |
+| --- | --- | --- |
+| 07:00 | 아침 경건회 | 팀별 자체 QT — 로마서 12:1-2 묵상 |
+| 08:00 | 아침 식사 |  |
+| **09:00** | **교리 강의 2** | 인간의 전적 타락과 세상의 방식의 한계 |
+| **10:30** | **교리 강의 3** | 복음이 세상의 방식을 이기는 방법 |
+| 12:00 | 점심 식사 |  |
+| 13:30 | 교리 레크레이션 2 | 성경 퀴즈쇼 + 롤플레이 (요셉, 다니엘, 에스더) |
+| 15:30 | 팀 프로젝트 | "우리 학교/반에서 하나님의 방식으로 승리하는 법" 발표 준비 |
+| 17:00 | 팀 발표 | 각 팀 3분 발표 + 전체 피드백 |
+| 19:00 | 저녁 식사 |  |
+| **20:00** | **저녁 집회 2** | 주제: "십자가가 세상을 이겼다" — 깊은 회개와 결단 예배 |
+| 22:00 | 소그룹 나눔 | 오늘 회개하거나 결단한 것 나눔 |
+| 23:00 | 취침 |  |
+
+## **교리 강의 2 교안**
+
+| **강의 2 — 인간의 전적 타락 — 왜 세상의 방식은 결국 무너지는가** |
+| --- |
+
+| **핵심 구절** | "만물보다 거짓되고 심히 부패한 것은 마음이라" (렘 17:9) |
+| --- | --- |
+| **교육 목표** | 세상의 방식이 공허한 이유가 인간의 전적 타락에 있음을 이해하고, 스스로의 힘으로는 진정한 승리가 불가능함을 깨닫는다 |
+| **핵심 교리** | 전적 타락 (Total Depravity) — 인간의 모든 부분이 죄의 영향을 받았으며, 스스로 하나님께 나아갈 수 없다 |
+
+**강의 내용**
+
+- 도입: 세상에서 '성공한' 사람들의 이야기 — 그런데 왜 많은 이들이 정상에서 무너지는가?
+
+- 전적 타락의 의미: '완전히 나쁘다'는 뜻이 아니라, 죄가 인간의 모든 영역(이성, 감정, 의지, 관계)에 영향을 미친다는 뜻
+
+- 세상의 방식이 약속하는 것들: 성적이 좋으면 행복해진다 / 인기가 있으면 외롭지 않다 / 돈이 있으면 자유롭다
+
+- 그 약속들이 왜 거짓인가: 전도서 1-2장 — 솔로몬은 세상의 모든 방식을 다 시도했지만 '헛되고 헛되다'고 고백했다
+
+- 결론: 세상의 방식이 무너지는 이유는 그것이 타락한 인간이 타락한 시스템 안에서 만든 것이기 때문이다
+
+**소그룹 토의 질문**
+
+- 내가 가장 많이 의존하는 세상의 방식은 무엇인가? (성적? 외모? 친구 관계?)
+
+- 그것이 내 기대를 배신했던 경험이 있는가?
+
+- 솔로몬의 '헛되다'는 고백이 나에게 어떻게 들리는가?
+
+**교리 레크레이션**
+
+롤플레이 게임 — '요셉 시뮬레이션': 3인 1팀으로 형제들(세상의 방식), 요셉(하나님의 방식), 내레이터 역할을 맡아 창세기 37-50장의 주요 장면을 재연한다. 세상의 방식(질투, 배신)과 하나님의 방식(용서, 섭리)이 어떤 결과를 낳는지 직접 체험한다.
+
+## **교리 강의 3 교안**
+
+| **강의 3 — 복음이 세상의 방식을 이기는 방법** |
+| --- |
+
+| **핵심 구절** | "이것을 너희에게 이르는 것은 너희로 내 안에서 평안을 누리게 하려 함이라 세상에서는 너희가 환난을 당하나 담대하라 내가 세상을 이기었노라" (요 16:33) |
+| --- | --- |
+| **교육 목표** | 복음(십자가와 부활)이 어떻게 세상의 방식을 이기는지 이해하고, 그 승리가 나의 것임을 믿음으로 붙든다 |
+| **핵심 교리** | 대속 (Atonement) & 칭의 (Justification) — 그리스도의 십자가가 죄와 세상의 권세를 이겼으며, 믿음으로 그 승리에 연합한다 |
+
+**강의 내용**
+
+- 세상의 승리 공식: 강한 자가 이긴다 / 많이 가진 자가 이긴다 / 빠른 자가 이긴다
+
+- 복음의 승리 공식: 약함으로 강함을 이긴다 / 내어줌으로 얻는다 / 죽음으로 생명을 이긴다
+
+- 십자가: 세상이 보기에는 가장 큰 패배 — 그러나 그것이 역사상 가장 큰 승리였다 (고전 1:18-25)
+
+- 부활: 세상의 방식(죽음, 절망)에 대한 하나님의 최종 답변 — 부활은 하나님의 방식이 반드시 이긴다는 보증이다
+
+- 실제 적용: 학교에서 복음의 방식으로 산다는 것은? — 경쟁이 아닌 섬김 / 인정받음이 아닌 사랑함 / 이김이 아닌 내어줌
+
+**소그룹 토의 질문**
+
+- 예수님의 십자가가 '세상을 이겼다'는 것이 내 삶에서 구체적으로 무엇을 의미하는가?
+
+- 복음의 방식(섬김, 용서, 낮아짐)으로 살았을 때 진짜 승리를 경험한 적이 있는가?
+
+- 지금 내가 세상의 방식에 굴복하고 있는 영역은 어디인가?
+
+**교리 레크레이션**
+
+팀 프로젝트 — '하나님 방식 선언문': 각 팀이 우리 학교/반/가정에서 하나님의 방식으로 승리하는 구체적인 방법을 3가지 이상 만들어 발표한다. 단순한 다짐이 아니라 실제 행동 계획(누가, 언제, 어떻게)까지 포함한다.
+
+## **저녁 집회 2 교안**
+
+| **저녁 집회 2 — ****"****십자가가 세상을 이겼다****"** |
+| --- |
+
+오늘 저녁은 수련회의 가장 핵심적인 시간입니다. 낮에 배운 복음의 능력이 각 학생의 마음에 실제로 임하는 시간입니다. 회개와 결단이 흘러야 합니다.
+
+**진행 순서 (120분)**
+
+| 20분 | 찬양 인도 — '주의 십자가 / When I Survey the Wondrous Cross', '주님 발 앞에', '오직 주만이' |
+| --- | --- |
+| 5분 | 침묵 기도 — 조용히 자신의 마음을 하나님 앞에 내려놓는 시간 |
+| **30분** | 말씀 선포 — 로마서 8:31-39: 아무것도 우리를 하나님의 사랑에서 끊을 수 없다. 세상의 방식이 우리를 정죄할 수 없다! |
+| **20분** | 회개 기도 시간 — 담당 교역자 인도. '세상의 방식을 따랐던 것들'을 구체적으로 하나님 앞에 내놓는 기도. 필요한 학생은 앞으로 나와 안수기도 |
+| 15분 | 결단 선포 — 각자 종이에 '나는 ___ 대신 하나님의 방식으로 ___하겠습니다'를 적고 기도로 드림 |
+| 10분 | 중보기도 & 파송 — 교사들이 학생들을 위해 안수하며 파송 기도 |
+
+# **3일차 — 하나님의 방식으로 세상으로 나가라**
+
+마지막 날은 "파송"입니다. 수련회 안에서 배우고 경험한 것이 일상으로 흘러가도록 구체적인 결단과 파송으로 마무리합니다.
+
+## **일정표**
+
+| **시간** | **프로그램** | **내용 및 비고** |
+| --- | --- | --- |
+| 07:00 | 아침 경건회 | 팀별 자체 QT — 빌립보서 4:11-13 묵상 (어떤 형편에서도 자족하는 법) |
+| 08:00 | 아침 식사 |  |
+| **09:00** | **교리 강의 4** | 성화 — 하나님의 방식으로 살아가는 매일의 훈련 |
+| 10:30 | 개인 묵상 시간 | 수련회 전체를 돌아보며 하나님이 주신 메시지 정리 |
+| **11:00** | **파송 예배** | 수련회의 클라이막스 — 선포, 찬양, 파송 기도 |
+| 12:30 | 점심 식사 |  |
+| 13:30 | 귀가 준비 | 결단문 작성 완료, 교사와 개인 기도 시간 |
+| 14:30 | 출발 |  |
+
+## **교리 강의 4 교안**
+
+| **강의 4 — 성화 — 하나님의 방식으로 사는 매일의 훈련** |
+| --- |
+
+| **핵심 구절** | "그러므로 형제들아 내가 하나님의 모든 자비하심으로 너희를 권하노니 너희 몸을 하나님이 기뻐하시는 거룩한 산 제물로 드리라 이것이 너희의 영적 예배니라" (롬 12:1) |
+| --- | --- |
+| **교육 목표** | 성화가 단번에 완성되는 것이 아니라 매일의 선택과 훈련임을 이해하고, 수련회 이후의 구체적인 삶의 계획을 세운다 |
+| **핵심 교리** | 성화 (Sanctification) — 성령의 역사로 믿는 자가 점진적으로 하나님의 형상을 회복하고 죄와 싸워 이겨가는 과정 |
+
+**강의 내용**
+
+- 수련회가 끝나면 무슨 일이 생기는가? — 월요일 아침, 다시 학교로 간다. 그 때도 하나님의 방식을 선택할 수 있는가?
+
+- 성화란 무엇인가: 단번에 완벽해지는 것이 아니라, 날마다 하나님의 방식을 선택하는 훈련의 과정
+
+- 세 가지 구체적인 훈련: (1) 말씀 묵상 — 세상의 방식이 아닌 하나님의 방식으로 생각하는 훈련, (2) 기도 — 내 힘이 아닌 하나님의 능력을 의지하는 훈련, (3) 공동체 — 혼자가 아니라 함께 하나님의 방식으로 살아가기
+
+- 실패했을 때: 성화는 완벽함이 아니라 방향이다. 넘어져도 다시 일어나 하나님의 방식으로 돌아오면 된다
+
+- 파송: 너희는 이 수련회를 마치고 세상으로 돌아가는 것이 아니라, 하나님 나라의 시민으로서 세상 속으로 파송받는 것이다
+
+**소그룹 토의 질문**
+
+- 수련회에서 가장 마음에 남는 하나님의 메시지는 무엇인가?
+
+- 학교로 돌아갔을 때 가장 먼저 하나님의 방식으로 바꾸고 싶은 것 한 가지는?
+
+- 서로를 위해 어떻게 기도하고 응원할 수 있을까?
+
+**교리 레크레이션**
+
+결단문 작성 — 각자 '하나님 나라 시민 선언서'를 작성한다. (1) 내가 지금까지 의존하던 세상의 방식 한 가지, (2) 그것 대신 선택할 하나님의 방식, (3) 나를 응원해줄 친구 한 명. 이것을 소그룹 안에서 나누고 함께 기도한다.
+
+## **파송 예배 교안**
+
+| **파송 예배 — ****"****하나님의 방식으로 세상으로 나가라****"** |
+| --- |
+
+파송 예배는 수련회의 결론이자 진짜 시작입니다. 여기서 끝나는 것이 아니라, 여기서부터 하나님 나라의 삶이 시작됩니다.
+
+**진행 순서 (90분)**
+
+| 15분 | 찬양 — '주 나를 불러 세우시고', '더 나아가', '세상의 빛과 소금'으로 파송의 분위기를 만든다 |
+| --- | --- |
+| 10분 | 수련회 돌아보기 — 각 날의 하이라이트 사진/영상으로 하나님이 행하신 일을 기억한다 |
+| **20분** | 결단문 낭독 & 헌신 — 각 소그룹 대표가 팀의 결단을 선포한다. 전체가 함께 '아멘'으로 화답 |
+| **15분** | 파송 설교 — 마태복음 5:13-16 '너희는 세상의 소금과 빛이라' — 우리는 세상의 방식에 물드는 것이 아니라 세상을 변화시키도록 파송받는다 |
+| **20분** | 파송 기도 — 교사들이 소그룹별로 학생들을 위해 안수하며 기도. 각 학생의 이름을 부르며 개인 파송 기도 |
+| 10분 | 마무리 찬양 & 아멘 선포 — 전체가 함께 크게 선포: '우리는 하나님 나라의 사람들이다!' |
+
+# **담당 교역자 체크리스트**
+
+## **사전 준비**
+
+- 강의별 PPT 또는 판서 자료 준비 (각 강의 핵심 구절, 개요)
+
+- 소그룹 교사 사전 모임 — 수련회 2주 전, 전체 흐름과 저녁 집회 기도 방향 공유
+
+- 찬양팀 사전 연습 — 저녁 집회 특성(회개, 결단, 파송)에 맞는 찬양 선곡
+
+- 레크레이션 진행자 준비 — 토론 게임, 퀴즈쇼, 롤플레이 시나리오 사전 작성
+
+- 결단문 양식 인쇄 (학생 수 + 여분 20%)
+
+- 소그룹 팀 배정 (5-7명 1팀, 학교/학년 혼합 배치 권장)
+
+## **저녁 집회 유의사항**
+
+- 저녁 집회는 절대 시간에 쫓기지 말 것 — 성령의 역사가 임할 때 흐름을 따라가야 한다
+
+- 강압적 결신 유도 금지 — 자발적인 반응을 기다리고, 개인 기도 시간을 충분히 준다
+
+- 2일차 저녁 회개 기도 시, 안수기도 받기 원하는 학생은 앞으로 나오게 한다. 교사들이 옆에서 함께 기도
+
+- 감정적 분위기가 고조될 때 교사들은 학생들 곁에서 조용히 중보한다
+
+- 모든 결단과 기도 내용은 비밀이 보장됨을 사전에 공지할 것
+
+## **수련회 후 후속 조치**
+
+- 귀가 후 1주일 이내: 소그룹 교사가 학생들에게 개인 연락 (안부 + 결단 응원)
+
+- 다음 주일: 수련회 후기 나눔 시간 — 하나님이 행하신 일을 함께 나눔
+
+- 결단문 복사본 보관: 교사가 학생의 결단문을 보관, 3개월 후 다시 전달하며 점검
+
+- 소그룹 기도 모임 연결: 수련회 소그룹이 지속적인 기도 모임으로 이어지도록 격려
+
+| **하나님 나라, 하나님의 방식으로 — 이 수련회가 아이들의 삶을 바꾸는 전환점이 되기를 기도합니다!** |
+| --- |
+
+-  -`;
+
+// 현재 웹사이트에 입력된 안내 정보를 문자열로 모음
+function buildSiteContext() {
+  let lines = [];
+  lines.push('[안내문 제목] ' + (data.title || ''));
+  lines.push('[주제 표어] ' + (data.theme || ''));
+  lines.push('[날짜] ' + (data.date || ''));
+  lines.push('[장소] ' + (data.place || ''));
+  lines.push('[준비물] ' + (data.items || ''));
+  lines.push('[도움 안내] ' + (data.help || ''));
+  if (Array.isArray(data.schedule)) {
+    lines.push('[일정표]');
+    data.schedule.forEach(d => {
+      lines.push('  ' + (d.day || ''));
+      (d.rows || []).forEach(r => {
+        lines.push('    ' + (r.time || '') + ' ' + (r.act || '') + (r.note ? ' (' + r.note + ')' : ''));
+      });
+    });
+  }
+  if (Array.isArray(data.routes)) {
+    lines.push('[이동 동선]');
+    data.routes.forEach((r, i) => lines.push('  ' + (i + 1) + '. ' + (r.text || '')));
+  }
+  try {
+    const notices = loadNotices();
+    if (notices && notices.length) {
+      lines.push('[공지사항]');
+      notices.forEach(n => lines.push('  ' + (n.urgent ? '(중요) ' : '') + (n.text || '')));
+    }
+  } catch (e) {}
+  return lines.join('\n');
+}
+
+function setQaAnswer(msg, type) {
+  const el = document.getElementById('qa-answer');
+  el.className = 'qa-answer show' + (type ? ' ' + type : '');
+  if (type === 'busy') {
+    el.innerHTML = '<span class="qa-spin"></span>' + esc(msg);
+  } else {
+    el.textContent = msg;
+  }
+}
+
+function askExample(q) {
+  document.getElementById('qa-input').value = q;
+  askQuestion();
+}
+
+async function askQuestion() {
+  const btn = document.getElementById('qa-ask-btn');
+  const input = document.getElementById('qa-input');
+  const question = input.value.trim();
+  const key = QA_GEMINI_API_KEY;
+
+  if (!question) { setQaAnswer('궁금한 점을 입력해 주세요.', 'err'); return; }
+  if (!key || key === 'PASTE_YOUR_NEW_KEY_HERE') {
+    setQaAnswer('API 키가 아직 설정되지 않았어요. 파일의 QA_GEMINI_API_KEY에 키를 넣어 주세요.', 'err'); return;
+  }
+
+  btn.disabled = true;
+  setQaAnswer('답변을 찾고 있어요…', 'busy');
+
+  const siteContext = buildSiteContext();
+  const prompt = '당신은 교회 수련회 안내 도우미입니다. 아래의 [웹사이트 안내 정보]와 [수련회 교안 문서]만을 근거로 질문에 답하세요.\n' +
+    '규칙:\n' +
+    '- 반드시 아래 자료에 있는 내용만으로 답합니다. 자료에 없는 내용은 지어내지 말고 "안내 자료에서는 찾을 수 없어요. 담당 교사에게 물어봐 주세요."라고 안내합니다.\n' +
+    '- 따뜻하고 쉬운 한국어로, 핵심만 간결하게 답합니다.\n' +
+    '- 일정/시간을 물으면 시간과 프로그램을 정확히 알려줍니다.\n\n' +
+    '[웹사이트 안내 정보]\n' + siteContext + '\n\n' +
+    '[수련회 교안 문서]\n' + CURRICULUM_TEXT + '\n\n' +
+    '[질문]\n' + question;
+
+  const model = 'gemini-2.5-flash';
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent';
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.3 }
+      })
+    });
+
+    if (!res.ok) {
+      let detail = '';
+      try { const e = await res.json(); detail = e.error && e.error.message ? e.error.message : ''; } catch (e) {}
+      if (res.status === 400 && /API key/i.test(detail)) {
+        setQaAnswer('API 키가 올바르지 않은 것 같아요. 다시 확인해 주세요.', 'err');
+      } else if (res.status === 429) {
+        setQaAnswer('요청이 많아 잠시 막혔어요. 1~2분 뒤 다시 시도해 주세요.', 'err');
+      } else {
+        setQaAnswer('답변 실패: ' + (detail || ('오류 코드 ' + res.status)), 'err');
+      }
+      btn.disabled = false;
+      return;
+    }
+
+    const json = await res.json();
+    let text = '';
+    try {
+      text = json.candidates[0].content.parts.map(p => p.text || '').join('');
+    } catch (e) {
+      setQaAnswer('답변을 읽지 못했어요. 다시 시도해 주세요.', 'err');
+      btn.disabled = false; return;
+    }
+    setQaAnswer(text.trim() || '답변이 비어 있어요. 다시 시도해 주세요.', null);
+  } catch (e) {
+    setQaAnswer('네트워크 오류가 났어요. 인터넷 연결을 확인해 주세요.', 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ============================================
+// 초기화
+// ============================================
+(function init() {
+  try {
+    const s = JSON.parse(localStorage.getItem(A11Y_STORE));
+    if (s) {
+      fontScale = s.fontScale || 1;
+      if (s.contrast) {
+        document.body.classList.add('high-contrast');
+        document.getElementById('contrast-btn').classList.add('on');
+      }
+    }
+  } catch (e) {}
+  document.documentElement.style.setProperty('--fs', fontScale);
+  renderViews();
+  renderNotices();
+  setMode('view');
+})();
+</script>
+</body>
+</html>
